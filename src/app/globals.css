@@ -2,32 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --color-blue-100: #080815;
+    --color-blue-200: #0e0f25;
+    --color-blue-300: #141534;
+    --color-blue-400: #1f2151;
+    --color-blue-500: #2f3279;
+    --color-blue-600: #2f34ab;
+    --color-blue-700: #4a5dcd;
+    --color-blue-800: #7d8dec;
+    --color-blue-900: #b2b8de;
+    --color-white: #f1f2f6;
   }
-}
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  /* Aqui com o apply a gente usa o próprio padrão do tailwind para deifinir esses conjuntos de valores, e depois, quando precisar usar isso nos componentes a gente só coloca no className="body", por exemplo */
+  .body,
+  .span,
+  .error {
+    @apply text-base leading-5 font-normal;
+    /* font-size: 16px; */ /* line-height: 20px; */ /* font-weight: 400;  */
   }
+
+  .error {
+    @apply text-[var(--color-white)] self-center font-bold;
+  }
+
+  .heading {
+    @apply text-[32px] leading-[48px] font-bold;
+  }
+
+  .button {
+    @apply w-[352px] h-[52px] border-none rounded-lg text-base leading-5 font-semibold bg-[var(--color-blue-600)] text-[var(--color-white)];
+    transition: background-color 0.3s;
+  }
+
+  .button:hover {
+    @apply bg-[var(--color-blue-700)];
+  }
+
+  .button:disabled {
+    @apply bg-[var(--color-blue-600)];
+  }
+
+  .label {
+    @apply text-xs leading-4 font-normal text-[var(--color-blue-900)];
+    transition: color 0.3s;
+  }
+
+  .focused {
+    @apply text-[var(--color-blue-700)];
+  }
+
+  input,
+  select {
+    @apply bg-[var(--color-blue-200)] w-[352px] h-[76px] py-4 px-5 text-[var(--color-blue-900)] border border-[var(--color-blue-400)] rounded-lg outline-none;
+  }
+
+  select:focus,
+  input:focus {
+    border: 1px solid var(--color-blue-700);
+  }
+
+  /* span {
+    color: var(--color-blue-900);
+  } */
 }

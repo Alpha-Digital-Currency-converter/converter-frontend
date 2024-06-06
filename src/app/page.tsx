@@ -1,112 +1,183 @@
+"use client";
+
 import Image from "next/image";
+import { Inter } from "next/font/google";
+import { ChangeEvent, use, useState } from "react";
+import { faker } from "@faker-js/faker";
+import { Header } from "@/components/Header";
+import { Label } from "@/components/Label";
 
 export default function Home() {
+  //Estado para controlar a cor do label do input e do select, caso eles estejam selecionados
+  const [inputFocus, setInputFocus] = useState(false);
+  const [selectFocus, setSelectFocus] = useState(false);
+
+  //Criei um estado para controla a habilitação e desabilitação do botão de acordo com o input ter ou não um valor e com o select ter uma cotação
+  const [inputValue, setInputValue] = useState("");
+  const [selectedCurrency, setSelectedCurrency] = useState("USD");
+  const [buttonDisabled, setButtonDisabled] = useState(true);
+
+  //Estado para salvar as 10 últimas cotações
+  const [recentConversions, setRecentConversions] = useState<number[]>([]);
+
+  //Estado para controlar a exibição da div
+  const [showResult, setShowResult] = useState(false);
+
+  //Para remover as bordas arredondadas debaixo quando clica no botão
+  const [inputContainerClassName, setInputContainerClassName] = useState(
+    "w-[480px] h-96 border boder rounded-3xl flex flex-col items-center justify-center"
+  );
+
+  const [error, setError] = useState("");
+
+  // Estado para armazenar as opções do select
+  const [options, setOptions] = useState<Options[]>([]);
+
+  interface Options {
+    value: string;
+    name: string;
+  }
+
+   //Por enquanto que não tem a api, ele só vai mostrar a div e um resultado simulado
+   const handleButtonClick = () => {
+    // Simular uma requisição à API
+    const simulatedResponse = simulateApiRequest(inputValue, selectedCurrency);
+    console.log(simulatedResponse);
+
+    setShowResult(true);
+    setInputContainerClassName(
+      "w-[480px] h-96 border boder-t rounded-t-3xl flex flex-col items-center justify-center"
+    );
+  };
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const inputValue = event.target.value;
+    // Verificar se o valor inserido contém apenas números
+    if (/^\d*$/.test(inputValue)) {
+      setInputValue(inputValue);
+      setShowResult(false);
+      setInputContainerClassName(
+        "w-[480px] h-96 border boder rounded-3xl flex flex-col items-center justify-center"
+      );
+      setButtonDisabled(inputValue === "" || selectedCurrency === "");
+    }
+  };
+
+  // Handlers para atualizar os estados
+  const handleCurrencyChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCurrency(event.target.value);
+    setShowResult(false);
+    setInputContainerClassName(
+      "w-[480px] h-96 border boder rounded-3xl flex flex-col items-center justify-center"
+    );
+    setButtonDisabled(event.target.value === "" || inputValue === "");
+  };
+
+  const [currentValue, setCurrentValue] = useState(0);
+  const [total, setTotal] = useState(0);
+  // Função para simular uma requisição à API
+  const simulateApiRequest = (valor: string, moeda: string) => {
+    // Simular a resposta da API
+    const response = {
+      code: moeda, // Corrigido para passar apenas a string da moeda
+      name: faker.finance.currencyName(),
+      value: Number(
+        faker.finance.amount({ min: 1, max: 8, dec: 2 }).toString()
+      ), // Convertido para string antes de chamar parseFloat
+      date: faker.date.recent().toISOString(),
+      total: 0,
+    };
+
+    setCurrentValue(response.value);
+    // Calcular o total
+    setTotal((response.total = response.value * parseFloat(valor)));
+    return response;
+  };
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    // Verificar se a tecla pressionada é uma letra
+    if (!/^\d$/.test(event.key)) {
+      setError("Insira apenas números");
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+      // Se for uma letra, cancelar o evento para impedir que a letra seja inserida
+      event.preventDefault();
+    }
+  };
+
+ 
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main
+      className=" min-h-screen bg-cover bg-center bg-no-repeat flex items-start justify-center"
+      style={{ backgroundImage: "url(/background.svg)" }}
+    >
+      <div className="flex-col items-center justify-center">
+        {/* "Header" */}
+        <Header title="CONVERT" />
+        {/* Input e select */}
+        <div
+          className={inputContainerClassName}
+          style={{
+            backgroundColor: "var(--color-blue-300)",
+            border: "1px solid var(--color-blue-500)",
+          }}
+        >
+          <div className="gap-5 flex flex-col ">
+            <div className="flex flex-col w-[352px] h-[76px] gap-2">
+              <Label focus={inputFocus} title="VALOR" for="coinValue" />
+              <input
+                onFocus={() => setInputFocus(true)}
+                onBlur={() => setInputFocus(false)}
+                className="body"
+                type="text"
+                id="coinValue"
+                onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
+              />
+              <span className="span error ">{error}</span>
+            </div>
+            <div className="flex flex-col w-[352px] h-[76px] gap-2">
+              <Label focus={selectFocus} title="MOEDA" for="coin" />
+              <select
+                onFocus={() => setSelectFocus(true)}
+                onBlur={() => setSelectFocus(false)}
+                className="body"
+                name="coin"
+                id="coin"
+                onChange={handleCurrencyChange}
+              >
+                <option value="USD">Dólar americano</option>
+                <option value="EUR">Euro</option>
+                <option value="JPY">Iene</option>
+                <option value="ARS">Peso Argentino</option>
+                <option value="CNY">Yuan Chinês</option>
+              </select>
+            </div>
+            <button
+              className="button"
+              disabled={buttonDisabled}
+              onClick={handleButtonClick}
+            >
+              Converter em reais
+            </button>
+          </div>
         </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
+        {/* Resultado */}
+        {showResult && (
+          <div
+            className="flex flex-col items-center justify-center w-[480px] h-[156px] gap-2 mb-56 rounded-b-3xl"
+            style={{ backgroundColor: "var(--color-blue-400)" }}
+          >
+            <span className="span" style={{ color: "var(--color-blue-800)" }}>
+              {selectedCurrency} 1 = {currentValue}
             </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
+            <span className="heading" style={{ color: "var(--color-white)" }}>
+              {total},00 Reais
             </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+          </div>
+        )}
       </div>
     </main>
   );
