@@ -5,7 +5,9 @@ import { Inter } from "next/font/google";
 import { ChangeEvent, use, useState } from "react";
 import { faker } from "@faker-js/faker";
 import { Header } from "@/components/Header";
+import { CustomSelect } from "@/components/Select"
 import { Label } from "@/components/Label";
+import { ChevronDown } from "lucide-react";
 
 export default function Home() {
   //Estado para controlar a cor do label do input e do select, caso eles estejam selecionados
@@ -38,8 +40,8 @@ export default function Home() {
     name: string;
   }
 
-   //Por enquanto que não tem a api, ele só vai mostrar a div e um resultado simulado
-   const handleButtonClick = () => {
+  //Por enquanto que não tem a api, ele só vai mostrar a div e um resultado simulado
+  const handleButtonClick = () => {
     // Simular uma requisição à API
     const simulatedResponse = simulateApiRequest(inputValue, selectedCurrency);
     console.log(simulatedResponse);
@@ -106,8 +108,6 @@ export default function Home() {
     }
   };
 
- 
-
   return (
     <main
       className=" min-h-screen bg-cover bg-center bg-no-repeat flex items-start justify-center"
@@ -138,12 +138,23 @@ export default function Home() {
               />
               <span className="span error ">{error}</span>
             </div>
-            <div className="flex flex-col w-[352px] h-[76px] gap-2">
+            <CustomSelect
+                options={[
+                  { value: "USD", label: "Dólar americano" },
+                  { value: "EUR", label: "Euro" },
+                  { value: "JPY", label: "Iene" },
+                  { value: "ARS", label: "Peso Argentino" },
+                  { value: "CNY", label: "Yuan Chinês" },
+                ]}
+                selected={selectedCurrency}
+                onChange={(value) => setSelectedCurrency(value)}
+              />
+            {/* <div className="flex flex-col w-[352px] h-[76px] gap-2">
               <Label focus={selectFocus} title="MOEDA" for="coin" />
               <select
                 onFocus={() => setSelectFocus(true)}
                 onBlur={() => setSelectFocus(false)}
-                className="body"
+                className="body custom-select"
                 name="coin"
                 id="coin"
                 onChange={handleCurrencyChange}
@@ -154,7 +165,8 @@ export default function Home() {
                 <option value="ARS">Peso Argentino</option>
                 <option value="CNY">Yuan Chinês</option>
               </select>
-            </div>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-700" />
+            </div> */}
             <button
               className="button"
               disabled={buttonDisabled}
