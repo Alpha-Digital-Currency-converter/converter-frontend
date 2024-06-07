@@ -68,7 +68,7 @@
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    @apply bg-[var(--color-blue-200)] w-[352px] h-[54px] py-4 px-5 text-[var(--color-blue-900)] border border-[var(--color-blue-400)] rounded-lg outline-none;
+    @apply bg-[var(--color-blue-200)] w-[352px] h-[54px] py-4 px-5 text-[var(--color-white)] border border-[var(--color-blue-400)] rounded-lg outline-none;
   }
 
   .custom-select option::after {

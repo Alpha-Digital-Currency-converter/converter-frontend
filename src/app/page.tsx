@@ -5,7 +5,7 @@ import { Inter } from "next/font/google";
 import { ChangeEvent, use, useState } from "react";
 import { faker } from "@faker-js/faker";
 import { Header } from "@/components/Header";
-import { CustomSelect } from "@/components/Select"
+import { CustomSelect } from "@/components/CustomSelect";
 import { Label } from "@/components/Label";
 import { ChevronDown } from "lucide-react";
 
@@ -66,13 +66,13 @@ export default function Home() {
   };
 
   // Handlers para atualizar os estados
-  const handleCurrencyChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCurrency(event.target.value);
+  const handleCurrencyChange = (value: string) => {
+    setSelectedCurrency(value);
     setShowResult(false);
     setInputContainerClassName(
       "w-[480px] h-96 border boder rounded-3xl flex flex-col items-center justify-center"
     );
-    setButtonDisabled(event.target.value === "" || inputValue === "");
+    setButtonDisabled(value === "" || inputValue === "");
   };
 
   const [currentValue, setCurrentValue] = useState(0);
@@ -138,17 +138,21 @@ export default function Home() {
               />
               <span className="span error ">{error}</span>
             </div>
+            <Label focus={selectFocus} title="MOEDA" for="coinValue" />
             <CustomSelect
-                options={[
-                  { value: "USD", label: "Dólar americano" },
-                  { value: "EUR", label: "Euro" },
-                  { value: "JPY", label: "Iene" },
-                  { value: "ARS", label: "Peso Argentino" },
-                  { value: "CNY", label: "Yuan Chinês" },
-                ]}
-                selected={selectedCurrency}
-                onChange={(value) => setSelectedCurrency(value)}
-              />
+              id="coinValue"
+              onFocus={() => setSelectFocus(true)}
+              onBlur={() => setSelectFocus(false)}
+              options={[
+                { value: "USD", label: "Dólar americano" },
+                { value: "EUR", label: "Euro" },
+                { value: "JPY", label: "Iene" },
+                { value: "ARS", label: "Peso Argentino" },
+                { value: "CNY", label: "Yuan Chinês" },
+              ]}
+              selected={selectedCurrency}
+              onChange={(value) => handleCurrencyChange(value)}
+            />
             {/* <div className="flex flex-col w-[352px] h-[76px] gap-2">
               <Label focus={selectFocus} title="MOEDA" for="coin" />
               <select
