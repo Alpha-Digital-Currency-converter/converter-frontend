@@ -40,18 +40,6 @@ export default function Home() {
     name: string;
   }
 
-  //Por enquanto que não tem a api, ele só vai mostrar a div e um resultado simulado
-  const handleButtonClick = () => {
-    // Simular uma requisição à API
-    const simulatedResponse = simulateApiRequest(inputValue, selectedCurrency);
-    console.log(simulatedResponse);
-
-    setShowResult(true);
-    setInputContainerClassName(
-      "w-[480px] h-96 border boder-t rounded-t-3xl flex flex-col items-center justify-center"
-    );
-  };
-
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
     // Verificar se o valor inserido contém apenas números
@@ -74,54 +62,45 @@ export default function Home() {
     setButtonDisabled(value === "" || inputValue === "");
   };
 
-  const [currentValue, setCurrentValue] = useState(0);
-  const [total, setTotal] = useState(0);
-  // Função para simular uma requisição à API
-  const simulateApiRequest = (valor: string, moeda: string) => {
-    // Simular a resposta da API
-    const response = {
-      code: moeda, // Corrigido para passar apenas a string da moeda
-      name: faker.finance.currencyName(),
-      value: Number(
-        faker.finance.amount({ min: 1, max: 8, dec: 2 }).toString()
-      ), // Convertido para string antes de chamar parseFloat
-      date: faker.date.recent().toISOString(),
-      total: 0,
-    };
 
-    setCurrentValue(response.value);
-    // Calcular o total
-    setTotal((response.total = response.value * parseFloat(valor)));
-    console.log(response.total);
-    return response;
+  const handleButtonClick = async () => {
+    if (inputValue && selectedCurrency) {
+      await fetchData(Number(inputValue), selectedCurrency);
+    }
   };
 
-  const [currencyData, setCurrencyData] = useState<CurrencyData>([]);
 
-  interface CurrencyData {}
+  const [currentValue, setCurrentValue] = useState(0);
+  const [total, setTotal] = useState(0);
+  const fetchData = async (valor: number, moeda: string): Promise<void> => {
+    const url = "http://localhost:3000/cotacao";
+    const response: any = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        valor,
+        moeda,
+      }),
+    });
 
-  useEffect(() => {
-    //Vou colocar aqui a url que vou pegar com o Murilo
-    const url = "";
-    const fetchData = async (): Promise<void> => {
-      const response: any = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-        },
-      });
-
-      try {
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-
-        const data: CurrencyData[] = await response.json();
-      } catch (error: any) {
-        console.log(error.message);
+    try {
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
       }
-    };
-  }, []);
+
+      const data = await response.json();
+      setTotal(data.total);
+      setCurrentValue(data.value);
+      setShowResult(true);
+      setInputContainerClassName(
+        "w-[480px] h-96 border boder-t rounded-t-3xl flex flex-col items-center justify-center"
+      );
+    } catch (error: any) {
+      console.log(error.message);
+    }
+  };
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     // Verificar se a tecla pressionada é uma letra
