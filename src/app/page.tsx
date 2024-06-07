@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Inter } from "next/font/google";
-import { ChangeEvent, use, useState } from "react";
+import { ChangeEvent, use, useEffect, useState } from "react";
 import { faker } from "@faker-js/faker";
 import { Header } from "@/components/Header";
 import { CustomSelect } from "@/components/CustomSelect";
@@ -65,7 +65,6 @@ export default function Home() {
     }
   };
 
-  // Handlers para atualizar os estados
   const handleCurrencyChange = (value: string) => {
     setSelectedCurrency(value);
     setShowResult(false);
@@ -93,8 +92,36 @@ export default function Home() {
     setCurrentValue(response.value);
     // Calcular o total
     setTotal((response.total = response.value * parseFloat(valor)));
+    console.log(response.total);
     return response;
   };
+
+  const [currencyData, setCurrencyData] = useState<CurrencyData>([]);
+
+  interface CurrencyData {}
+
+  useEffect(() => {
+    //Vou colocar aqui a url que vou pegar com o Murilo
+    const url = "";
+    const fetchData = async (): Promise<void> => {
+      const response: any = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+        },
+      });
+
+      try {
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const data: CurrencyData[] = await response.json();
+      } catch (error: any) {
+        console.log(error.message);
+      }
+    };
+  }, []);
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     // Verificar se a tecla pressionada é uma letra
@@ -190,7 +217,7 @@ export default function Home() {
               {selectedCurrency} 1 = {currentValue}
             </span>
             <span className="heading" style={{ color: "var(--color-white)" }}>
-              {total},00 Reais
+              {total.toFixed(2)} Reais
             </span>
           </div>
         )}
