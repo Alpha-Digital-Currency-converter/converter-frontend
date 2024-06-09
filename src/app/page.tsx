@@ -32,18 +32,10 @@ export default function Home() {
 
   const [error, setError] = useState("");
 
-  // Estado para armazenar as opções do select
-  const [options, setOptions] = useState<Options[]>([]);
-
-  interface Options {
-    value: string;
-    name: string;
-  }
-
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
-    // Verificar se o valor inserido contém apenas números
-    if (/^\d*$/.test(inputValue)) {
+    // Verificar se o valor inserido contém apenas números ou números decimais
+    if (/^\d*\.?\d*$/.test(inputValue)) {
       setInputValue(inputValue);
       setShowResult(false);
       setInputContainerClassName(
@@ -62,18 +54,16 @@ export default function Home() {
     setButtonDisabled(value === "" || inputValue === "");
   };
 
-
   const handleButtonClick = async () => {
     if (inputValue && selectedCurrency) {
       await fetchData(Number(inputValue), selectedCurrency);
     }
   };
 
-
   const [currentValue, setCurrentValue] = useState(0);
   const [total, setTotal] = useState(0);
   const fetchData = async (valor: number, moeda: string): Promise<void> => {
-    const url = "http://localhost:3000/cotacao";
+    const url = "http://localhost:3000/api/cotacao";
     const response: any = await fetch(url, {
       method: "POST",
       headers: {
@@ -104,7 +94,7 @@ export default function Home() {
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     // Verificar se a tecla pressionada é uma letra
-    if (!/^\d$/.test(event.key)) {
+    if (!/^\d*\.?\d*$/.test(event.key)) {
       setError("Insira apenas números");
       setTimeout(() => {
         setError("");
